@@ -2,6 +2,8 @@
 
 本项目是 SPlayer 播放器第三方控制类插件，通过 LyricsIsland 协议推送歌词，显示到 ClassIsland 主界面。支持自定义端口、背景歌词过滤、对唱分行、翻译展示、下一行预览等个性化配置。
 
+![alt text](image.png)
+
 # 功能特性
 
 1. 切歌同步推送歌曲名、歌手信息
@@ -26,20 +28,18 @@
 
 ## 安装插件
 
-1. 打开 SPlayer-Next，打开 '设置' → '插件管理' → '在线导入'
+1. 打开 SPlayer-Next，打开 `设置` → `插件管理` → `在线导入`
 2. 输入以下链接并导入
 
 ```
-
 https://github.com/WindDrift/SPlayerLRC-In-ClassIsland/raw/refs/heads/main/SPlayerLRC-In-ClassIsland.js
-
 ```
 
 ## ClassIsland 配置
 
 1. 打开 ClassIsland，确保 ExtraIsland 插件已安装且正常运行
-2. 在 '应用设置' → '主界面' 中添加来自 ExtraIsland 插件的组件 '实时活动' 或 '动态歌词'
-3. '实时活动' 组件需要开启 '启用歌词'
+2. 在 `应用设置` → `主界面` 中添加来自 ExtraIsland 插件的组件 `实时活动` 或 `动态歌词`
+3. `实时活动` 组件需要开启 `启用歌词` 开关
 
 # 插件设置项说明
 
@@ -56,18 +56,14 @@ https://github.com/WindDrift/SPlayerLRC-In-ClassIsland/raw/refs/heads/main/SPlay
 ## 接口地址
 
 ```
-
 POST http://127.0.0.1:端口/component/lyrics/lyrics/
-
 ```
 
 ## 请求体 JSON 结构
 
 ```
-
 {
 "lyric": "主行歌词文本",
 "extra": "副行歌词文本（翻译/对唱/背景/下一行）"
 }
-
 ```
