@@ -1,10 +1,14 @@
 /**
- * @name SPlayerLRC-In-ClassIsland
+ * @name ClassIsland 联动
+ * @id winddrift.splayerlrc-classisland
  * @version 1.0.3
  * @author imsyy & WindDrift
+ * @homepage https://github.com/WindDrift/SPlayerLRC-In-ClassIsland
  * @type control
+ * @grant network
  * @apiLevel 2
  * @description 把当前歌词推送到 ClassIsland 主界面
+ * @updateUrl https://raw.githubusercontent.com/WindDrift/SPlayerLRC-In-ClassIsland/main/SPlayerLRC-In-ClassIsland.js
  */
 splayer.register({
   events: ["trackChange", "lyricChange", "lineChange"],
