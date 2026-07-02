@@ -1,7 +1,8 @@
 /**
  * @name ClassIsland 联动
  * @id winddrift.splayerlrc-classisland
- * @version 1.0.4
+ * @version 1.0.5
+ * @changelog 新增翻译显示行为下拉框（显示在副行/和原文合并/不显示）\n将“无翻译时显示下一行”改为“在副行显示下一行”，当副行无内容时显示下一行
  * @author imsyy & WindDrift
  * @homepage https://github.com/WindDrift/SPlayerLRC-In-ClassIsland
  * @type control
@@ -37,8 +38,8 @@ splayer.register({
     {
       key: "showNextLine",
       type: "switch",
-      label: "无翻译时显示下一行",
-      description: "当没有翻译可显示时，将下一行歌词显示在副行",
+      label: "在副行显示下一行",
+      description: "当副行没有任何内容时，将下一行歌词显示在副行",
       default: true,
     },
     {
@@ -170,17 +171,18 @@ splayer.player.on("lineChange", ({ index }) => {
     extra = lineText(extraLine);
   }
 
-  // 仍未确定副行时，按原有逻辑回退：翻译 > 下一行
+  // 仍未确定副行时，优先显示翻译
   // “和原文合并”模式下翻译已合并到主行，不再单独显示在副行
-  if (!extra && mainLine) {
-    if (showTrans && mainLine.translatedLyric) {
-      extra = mainLine.translatedLyric;
-    } else if (showNext) {
-      const nextIdx = findNextLineIndex(lines, index, skipBG);
-      if (nextIdx >= 0) {
-        extraLine = lines[nextIdx];
-        extra = lineText(extraLine);
-      }
+  if (!extra && mainLine && showTrans && mainLine.translatedLyric) {
+    extra = mainLine.translatedLyric;
+  }
+
+  // 副行为空时，按设置显示下一行
+  if (!extra && showNext) {
+    const nextIdx = findNextLineIndex(lines, index, skipBG);
+    if (nextIdx >= 0) {
+      extraLine = lines[nextIdx];
+      extra = lineText(extraLine);
     }
   }
 
