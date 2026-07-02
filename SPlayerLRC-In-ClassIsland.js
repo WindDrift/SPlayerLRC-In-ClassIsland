@@ -1,7 +1,7 @@
 /**
  * @name ClassIsland 联动
  * @id winddrift.splayerlrc-classisland
- * @version 1.0.3
+ * @version 1.0.4
  * @author imsyy & WindDrift
  * @homepage https://github.com/WindDrift/SPlayerLRC-In-ClassIsland
  * @type control
@@ -23,11 +23,16 @@ splayer.register({
       max: 65535,
     },
     {
-      key: "showTranslation",
-      type: "switch",
-      label: "显示翻译",
-      description: "当歌词行包含翻译时，将翻译显示在副行",
-      default: true,
+      key: "translationDisplay",
+      type: "select",
+      label: "翻译显示类型",
+      description: "选择歌词翻译的显示方式",
+      default: "extra",
+      options: [
+        { label: "显示在副行", value: "extra" },
+        { label: "和原文合并", value: "merge" },
+        { label: "不显示", value: "none" },
+      ],
     },
     {
       key: "showNextLine",
@@ -66,6 +71,15 @@ const post = (lyric, extra) => {
 
 /** 一行歌词 → 纯文本 */
 const lineText = (line) => (line && line.words ? line.words.map((w) => w.word).join("") : "");
+
+/** 一行歌词 → “原文丨译文”文本 */
+const formatLine = (line, withTranslation) => {
+  const text = lineText(line);
+  if (withTranslation && line && line.translatedLyric) {
+    return `${text}丨${line.translatedLyric}`;
+  }
+  return text;
+};
 
 /** 向前查找最近的主歌词行索引（用于背景歌词） */
 const findPrevMainLineIndex = (lines, from) => {
@@ -107,11 +121,16 @@ splayer.player.on("lyricChange", ({ lines: ls }) => {
 splayer.player.on("lineChange", ({ index }) => {
   const skipBG = splayer.getSetting("skipBackgroundLyrics");
   const overlapDuet = splayer.getSetting("overlapDuetAsExtra");
+  const translationDisplay = splayer.getSetting("translationDisplay") || "extra";
+  const showTrans = translationDisplay === "extra";
+  const showTransInMain = translationDisplay === "merge";
+  const showNext = splayer.getSetting("showNextLine");
   const cur = lines[index];
 
   let lyric = "";
   let extra = "";
   let mainLine = cur;
+  let extraLine = null;
 
   if (cur && cur.isBG) {
     // 当前是背景歌词行，向前找到所属主歌词行
@@ -127,6 +146,7 @@ splayer.player.on("lineChange", ({ index }) => {
     } else {
       mainLine = lines[mainIdx];
       lyric = lineText(mainLine);
+      extraLine = cur;
       extra = lineText(cur);
     }
   } else if (overlapDuet && cur && cur.isDuet) {
@@ -135,6 +155,7 @@ splayer.player.on("lineChange", ({ index }) => {
     if (mainIdx >= 0) {
       mainLine = lines[mainIdx];
       lyric = lineText(mainLine);
+      extraLine = cur;
       extra = lineText(cur);
     } else {
       lyric = lineText(cur);
@@ -145,17 +166,28 @@ splayer.player.on("lineChange", ({ index }) => {
 
   // 默认情况下，主歌词行的下一行若是背景歌词行，则把背景歌词显示在副行
   if (!skipBG && cur && !cur.isBG && lines[index + 1] && lines[index + 1].isBG) {
-    extra = lineText(lines[index + 1]);
+    extraLine = lines[index + 1];
+    extra = lineText(extraLine);
   }
 
   // 仍未确定副行时，按原有逻辑回退：翻译 > 下一行
+  // “和原文合并”模式下翻译已合并到主行，不再单独显示在副行
   if (!extra && mainLine) {
-    if (splayer.getSetting("showTranslation") && mainLine.translatedLyric) {
+    if (showTrans && mainLine.translatedLyric) {
       extra = mainLine.translatedLyric;
-    } else if (splayer.getSetting("showNextLine")) {
+    } else if (showNext) {
       const nextIdx = findNextLineIndex(lines, index, skipBG);
-      if (nextIdx >= 0) extra = lineText(lines[nextIdx]);
+      if (nextIdx >= 0) {
+        extraLine = lines[nextIdx];
+        extra = lineText(extraLine);
+      }
     }
+  }
+
+  // 在主行显示翻译时，将原文与译文合并为“原文丨译文”格式
+  lyric = formatLine(mainLine, showTransInMain);
+  if (extraLine) {
+    extra = formatLine(extraLine, showTransInMain);
   }
 
   post(lyric, extra);
